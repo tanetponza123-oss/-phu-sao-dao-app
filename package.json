@@ -1,0 +1,13 @@
+{
+  "name": "phu-sao-dao-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Availability planner for the Phu So Dao hiking trip",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
