@@ -107,28 +107,43 @@
   h2.section-title{
     font-family:'Kanit', sans-serif; font-size:17px; font-weight:600; margin: 0 0 14px; color: var(--pine-dark);
   }
-
-  table.summary-table{ width:100%; border-collapse: collapse; font-size: 13.5px; }
-  table.summary-table th{
-    text-align:left; font-size:12px; color: var(--text-dim); font-weight:600;
-    padding: 0 0 10px; border-bottom: 1px solid var(--line);
-  }
-  table.summary-table th.num{ text-align:center; }
-  table.summary-table td{
-    padding: 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
-  }
-  table.summary-table tr:last-child td{ border-bottom:none; }
-  .t-date{ font-weight:500; }
-  .t-names{ color: var(--text-dim); font-size:12.5px; margin-top:2px; }
-  .t-count{
-    font-family:'Kanit', sans-serif; font-weight:600; font-size:17px; text-align:center;
-    color: var(--pine);
-  }
-  tr.is-top .t-count{ color: var(--amber-dark); }
-  tr.is-top td{ background: var(--amber-light); }
-  tr.is-top td:first-child{ border-radius: 8px 0 0 8px; }
-  tr.is-top td:last-child{ border-radius: 0 8px 8px 0; }
   .empty{ color: var(--text-faint); font-size:13.5px; padding: 8px 0; }
+
+  .stats-row{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat-card{
+    background: var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding: 12px 14px;
+  }
+  .stat-num{ font-family:'Kanit', sans-serif; font-size:26px; font-weight:600; color: var(--pine-dark); line-height:1.1; }
+  .stat-label{ font-size:12px; color: var(--text-dim); margin-top:4px; }
+
+  .hero-pick{
+    background: var(--amber-light); border: 1px solid var(--amber);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;
+  }
+  .hero-pick-label{
+    font-size:11.5px; font-weight:600; color: var(--amber-dark); text-transform:uppercase;
+    letter-spacing:0.06em; margin-bottom:6px;
+  }
+  .hero-pick-date{ font-family:'Kanit', sans-serif; font-size:22px; font-weight:600; color: var(--pine-dark); }
+  .hero-pick-count{ font-size:13.5px; color: var(--amber-dark); font-weight:500; margin-top:4px; }
+  .hero-pick-names{ font-size:13px; color: var(--text-dim); margin-top:6px; }
+
+  .bar-row{ margin-bottom: 10px; }
+  .bar-row:last-child{ margin-bottom:0; }
+  .bar-top{ display:flex; justify-content:space-between; align-items:baseline; font-size:13px; margin-bottom:5px; }
+  .bar-date{ font-weight:500; }
+  .bar-count{ font-family:'Kanit', sans-serif; font-weight:600; color: var(--pine); }
+  .bar-track{ background: var(--moss-light); border-radius:6px; height:8px; overflow:hidden; }
+  .bar-fill{ background: var(--moss); height:100%; border-radius:6px; }
+  .bar-names{ font-size:11.5px; color: var(--text-faint); margin-top:4px; }
+
+  .summary-toggle{
+    display:block; width:100%; margin-top:14px; padding:9px 0; text-align:center;
+    background: var(--moss-light); border: 1px solid var(--line); border-radius:10px;
+    color: var(--pine-dark); font-size:13px; font-weight:500; cursor:pointer; font-family:inherit;
+  }
+  .summary-toggle:hover{ background: var(--line-soft); }
 
   .foot{ padding: 22px 24px 0; }
   .foot-row{ display:flex; justify-content:space-between; align-items:center; }
@@ -189,7 +204,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">ตารางสรุปวันว่าง</h2>
+    <h2 class="section-title">สรุปภาพรวม</h2>
     <div class="card" id="summaryCard">
       <div class="empty">ยังไม่มีใครเลือกวันเลย</div>
     </div>
@@ -360,30 +375,76 @@ function render(){
   renderManageList();
 }
 
+let summaryExpanded = false;
+
 function renderSummary(weeks){
   const card = document.getElementById('summaryCard');
   const all = weeks.flat().map(d => ({ d, key: dateKey(d), names: countFor(dateKey(d)) }))
     .filter(x => x.names.length > 0)
     .sort((a,b) => b.names.length - a.names.length || a.d - b.d);
 
+  const totalPeople = Object.keys(responses).filter(n => responses[n] && responses[n].length > 0).length;
+
   if(all.length === 0){
-    card.innerHTML = '<div class="empty">ยังไม่มีใครเลือกวันเลย</div>';
+    card.innerHTML =
+      '<div class="stats-row">' +
+        '<div class="stat-card"><div class="stat-num">' + totalPeople + '</div><div class="stat-label">คนตอบแล้ว</div></div>' +
+        '<div class="stat-card"><div class="stat-num">0</div><div class="stat-label">วันที่มีคนว่าง</div></div>' +
+      '</div>' +
+      '<div class="empty">ยังไม่มีใครเลือกวันเลย</div>';
+    summaryExpanded = false;
     return;
   }
 
-  const top = Math.max(...all.map(x => x.names.length));
+  const top = all[0].names.length;
+  const topPicks = all.filter(x => x.names.length === top);
+  const rest = all.filter(x => x.names.length !== top);
 
-  let html = '<table class="summary-table"><thead><tr><th>วันที่</th><th class="num">คนว่าง</th></tr></thead><tbody>';
-  all.slice(0, 12).forEach(item => {
-    const isTop = item.names.length === top;
-    html += '<tr class="' + (isTop ? 'is-top' : '') + '">' +
-      '<td><div class="t-date">' + THAI_DAY_FULL[item.d.getDay()] + ' ' + item.d.getDate() + ' ' + THAI_MONTH[item.d.getMonth()] + '</div>' +
-      '<div class="t-names">' + item.names.join(', ') + '</div></td>' +
-      '<td class="t-count">' + item.names.length + '</td>' +
-      '</tr>';
+  const COLLAPSED_COUNT = 4;
+  const showCount = summaryExpanded ? rest.length : Math.min(COLLAPSED_COUNT, rest.length);
+  const visibleRest = rest.slice(0, showCount);
+
+  let html = '<div class="stats-row">' +
+    '<div class="stat-card"><div class="stat-num">' + totalPeople + '</div><div class="stat-label">คนตอบแล้ว</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + all.length + '</div><div class="stat-label">วันที่มีคนว่าง</div></div>' +
+  '</div>';
+
+  topPicks.forEach(item => {
+    html += '<div class="hero-pick">' +
+      '<div class="hero-pick-label">ตัวเลือกยอดนิยม</div>' +
+      '<div class="hero-pick-date">' + THAI_DAY_FULL[item.d.getDay()] + ' ' + item.d.getDate() + ' ' + THAI_MONTH[item.d.getMonth()] + '</div>' +
+      '<div class="hero-pick-count">ว่าง ' + item.names.length + ' คน</div>' +
+      '<div class="hero-pick-names">' + item.names.join(', ') + '</div>' +
+    '</div>';
   });
-  html += '</tbody></table>';
+
+  if(visibleRest.length > 0){
+    visibleRest.forEach(item => {
+      const pct = Math.round((item.names.length / top) * 100);
+      html += '<div class="bar-row">' +
+        '<div class="bar-top"><span class="bar-date">' + THAI_DAY_FULL[item.d.getDay()] + ' ' + item.d.getDate() + ' ' + THAI_MONTH[item.d.getMonth()] + '</span>' +
+        '<span class="bar-count">' + item.names.length + '</span></div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="bar-names">' + item.names.join(', ') + '</div>' +
+      '</div>';
+    });
+  }
+
+  if(rest.length > COLLAPSED_COUNT){
+    html += '<button class="summary-toggle" id="summaryToggleBtn">' +
+      (summaryExpanded ? 'ย่อกลับ' : 'ดูทั้งหมด (' + rest.length + ' วันที่เหลือ)') +
+      '</button>';
+  }
+
   card.innerHTML = html;
+
+  const toggleBtn = document.getElementById('summaryToggleBtn');
+  if(toggleBtn){
+    toggleBtn.addEventListener('click', () => {
+      summaryExpanded = !summaryExpanded;
+      renderSummary(weeks);
+    });
+  }
 }
 
 function renderManageList(){
