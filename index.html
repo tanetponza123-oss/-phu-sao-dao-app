@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ไปเดินภูสอยดาวกัน · By Bookky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #141d27;
+    --panel: #1c2833;
+    --panel-2: #23323f;
+    --line: #2f4152;
+    --line-soft: #253440;
+    --text: #eef2f5;
+    --text-dim: #93a5b3;
+    --text-faint: #5f7181;
+    --dawn: #e8935a;
+    --dawn-dark: #3a2417;
+    --star: #f3c969;
+    --star-dark: #3f3418;
+    --forest: #7fa37a;
+    --forest-dark: #223327;
+    --danger: #e2726f;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Thai', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 720px; margin: 0 auto; padding: 0 0 48px; }
+  .hero{
+    position: relative;
+    overflow: hidden;
+    padding: 40px 24px 28px;
+    background: linear-gradient(180deg,#0e161f 0%, #141d27 78%);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero svg{ position:absolute; left:0; right:0; bottom:0; width:100%; height:auto; opacity:0.9; }
+  .hero-content{ position:relative; z-index:2; }
+  .eyebrow{
+    font-size: 12px; letter-spacing: 0.12em; color: var(--dawn);
+    text-transform: uppercase; font-weight:600; margin: 0 0 10px;
+  }
+  h1{
+    font-family:'Kanit', sans-serif; font-weight:700; font-size: 34px;
+    margin: 0 0 10px; line-height:1.2; color: var(--text);
+  }
+  .sub{ font-size: 15px; color: var(--text-dim); max-width: 480px; line-height:1.6; margin:0; }
+
+  .section{ padding: 28px 24px 0; }
+  .card{
+    background: var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding: 18px 20px;
+  }
+  label.field-label{
+    display:block; font-size:13px; color: var(--text-dim); margin-bottom:8px; font-weight:500;
+  }
+  input[type=text]{
+    width:100%; background: var(--panel-2); border:1px solid var(--line);
+    color: var(--text); border-radius:10px; padding: 11px 14px; font-size:15px;
+    font-family: inherit;
+  }
+  input[type=text]:focus{ outline:none; border-color: var(--dawn); }
+  .hint{ font-size:12.5px; color: var(--text-faint); margin-top:8px; }
+  .hint.warn{ color: var(--dawn); }
+
+  .week-row{ margin-top: 22px; }
+  .week-label{
+    font-size: 12.5px; color: var(--text-dim); font-weight:600; margin-bottom: 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .week-label .rule{ flex:1; height:1px; background: var(--line-soft); }
+  .day-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .day-card{
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 10px 12px; text-align:center; cursor:pointer; user-select:none;
+    transition: border-color .12s ease, background .12s ease;
+    position: relative;
+  }
+  .day-card:hover{ border-color: var(--line-soft); background: var(--panel-2); }
+  .day-card.picked{ border-color: var(--forest); background: var(--forest-dark); }
+  .day-card.top{ border-color: var(--star); }
+  .day-name{ font-size:12px; color: var(--text-dim); font-weight:600; margin-bottom:4px; }
+  .day-card.picked .day-name{ color: #cfe0cd; }
+  .day-num{ font-family:'Kanit', sans-serif; font-size:24px; font-weight:600; line-height:1.1; }
+  .day-month{ font-size:11.5px; color: var(--text-faint); margin-top:2px; }
+  .day-count{
+    margin-top:8px; display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; font-weight:600; color: var(--text-dim);
+    background: var(--panel-2); border-radius:20px; padding:3px 9px;
+  }
+  .day-card.picked .day-count{ background: rgba(0,0,0,0.18); color:#dcead9; }
+  .star-badge{
+    position:absolute; top:-8px; right:-6px; background: var(--star); color: var(--star-dark);
+    font-size:10px; font-weight:700; padding:3px 7px; border-radius:20px;
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+
+  .summary-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 11px 0; border-bottom: 1px solid var(--line-soft);
+    gap: 12px;
+  }
+  .summary-item:last-child{ border-bottom:none; }
+  .summary-date{ font-size:14.5px; font-weight:500; }
+  .summary-names{ font-size:12.5px; color: var(--text-dim); margin-top:2px; }
+  .summary-count{
+    font-family:'Kanit', sans-serif; font-size:18px; font-weight:600; color: var(--dawn);
+    white-space:nowrap;
+  }
+  .empty{ color: var(--text-faint); font-size:13.5px; padding: 8px 0; }
+
+  .foot{ padding: 22px 24px 0; display:flex; justify-content:space-between; align-items:center; }
+  .reset-link{ font-size:12.5px; color: var(--text-faint); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; font-family:inherit; }
+  .reset-link:hover{ color: var(--danger); }
+  .status{ font-size:12px; color: var(--text-faint); }
+
+  h2.section-title{
+    font-family:'Kanit', sans-serif; font-size:17px; font-weight:600; margin: 0 0 14px; color: var(--text);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg viewBox="0 0 720 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="80" cy="30" r="1.4" fill="#f3c969" opacity="0.8"/>
+      <circle cx="150" cy="18" r="1" fill="#f3c969" opacity="0.6"/>
+      <circle cx="230" cy="40" r="1.6" fill="#f3c969" opacity="0.7"/>
+      <circle cx="310" cy="15" r="1" fill="#f3c969" opacity="0.5"/>
+      <circle cx="400" cy="34" r="1.3" fill="#f3c969" opacity="0.8"/>
+      <circle cx="470" cy="20" r="1" fill="#f3c969" opacity="0.5"/>
+      <circle cx="540" cy="42" r="1.5" fill="#f3c969" opacity="0.7"/>
+      <circle cx="610" cy="16" r="1" fill="#f3c969" opacity="0.6"/>
+      <circle cx="670" cy="36" r="1.4" fill="#f3c969" opacity="0.7"/>
+      <polygon points="0,150 0,95 60,60 110,90 170,50 230,95 290,70 350,100 410,55 470,95 530,65 590,100 650,75 720,100 720,150" fill="#1c2833" opacity="0.9"/>
+      <polygon points="0,150 0,120 80,85 150,115 220,80 300,120 380,90 460,125 540,95 620,120 700,90 720,100 720,150" fill="#141d27"/>
+    </svg>
+    <div class="hero-content">
+      <p class="eyebrow">นัดหมายทริป · By Bookky</p>
+      <h1>ไปเดินภูสอยดาวกัน</h1>
+      <p class="sub">เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="card">
+      <label class="field-label" for="nameInput">ชื่อของคุณ</label>
+      <input type="text" id="nameInput" placeholder="เช่น บุ๊คกี้" autocomplete="off">
+      <p class="hint" id="nameHint">ใส่ชื่อก่อน แล้วค่อยแตะวันที่ว่างด้านล่างได้เลย</p>
+    </div>
+  </div>
+
+  <div class="section" id="weeksSection">
+    <h2 class="section-title">เลือกวันว่าง</h2>
+    <div id="weeksContainer"></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">สรุปวันที่ว่างเยอะที่สุด</h2>
+    <div class="card" id="summaryCard">
+      <div class="empty">ยังไม่มีใครเลือกวันเลย</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <button class="reset-link" id="resetBtn">ล้างตัวเลือกของฉัน</button>
+    <span class="status" id="statusText"></span>
+  </div>
+
+</div>
+
+<script>
+const THAI_DAY = { 5: 'ศ', 6: 'ส', 0: 'อา' };
+const THAI_DAY_FULL = { 5: 'ศุกร์', 6: 'เสาร์', 0: 'อาทิตย์' };
+const THAI_MONTH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+let responses = {};
+let currentName = '';
+
+function dateKey(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function buildDateList(){
+  const days = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const cursor = new Date(today);
+  const yearEnd = new Date(today.getFullYear(), 11, 31);
+  while(cursor <= yearEnd){
+    cursor.setDate(cursor.getDate() + 1);
+    if(cursor > yearEnd) break;
+    const dow = cursor.getDay();
+    if(dow === 5 || dow === 6 || dow === 0){
+      days.push(new Date(cursor));
+    }
+  }
+  const weeks = [];
+  for(let i = 0; i < days.length; i += 3){
+    weeks.push(days.slice(i, i+3));
+  }
+  return weeks;
+}
+
+function countFor(key){
+  let names = [];
+  for(const name in responses){
+    if(responses[name] && responses[name].includes(key)) names.push(name);
+  }
+  return names;
+}
+
+function maxCount(weeks){
+  let m = 0;
+  weeks.flat().forEach(d => {
+    const c = countFor(dateKey(d)).length;
+    if(c > m) m = c;
+  });
+  return m;
+}
+
+function setStatus(text){
+  document.getElementById('statusText').textContent = text;
+  if(text) setTimeout(() => { document.getElementById('statusText').textContent = ''; }, 2500);
+}
+
+async function loadData(){
+  try{
+    const res = await fetch('/api/responses');
+    if(!res.ok) throw new Error('bad response');
+    responses = await res.json();
+  }catch(e){
+    responses = {};
+    setStatus('โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้า');
+  }
+}
+
+async function saveMine(){
+  try{
+    const res = await fetch('/api/responses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: currentName, dates: responses[currentName] || [] })
+    });
+    if(!res.ok) throw new Error('bad response');
+    setStatus('บันทึกแล้ว');
+  }catch(e){
+    setStatus('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+  }
+}
+
+function toggleDate(key){
+  if(!currentName){
+    document.getElementById('nameHint').textContent = 'กรุณาใส่ชื่อก่อนเลือกวันว่าง';
+    document.getElementById('nameHint').classList.add('warn');
+    document.getElementById('nameInput').focus();
+    return;
+  }
+  if(!responses[currentName]) responses[currentName] = [];
+  const idx = responses[currentName].indexOf(key);
+  if(idx === -1){
+    responses[currentName].push(key);
+  }else{
+    responses[currentName].splice(idx, 1);
+  }
+  render();
+  saveMine();
+}
+
+async function resetMine(){
+  if(!currentName){ return; }
+  responses[currentName] = [];
+  render();
+  await saveMine();
+}
+
+function render(){
+  const weeks = buildDateList();
+  const top = maxCount(weeks);
+  const container = document.getElementById('weeksContainer');
+  container.innerHTML = '';
+
+  weeks.forEach(week => {
+    const row = document.createElement('div');
+    row.className = 'week-row';
+
+    const label = document.createElement('div');
+    label.className = 'week-label';
+    const first = week[0];
+    label.innerHTML = '<span>สัปดาห์ ' + first.getDate() + ' ' + THAI_MONTH[first.getMonth()] + '</span><span class="rule"></span>';
+    row.appendChild(label);
+
+    const grid = document.createElement('div');
+    grid.className = 'day-grid';
+
+    week.forEach(d => {
+      const key = dateKey(d);
+      const names = countFor(key);
+      const picked = currentName && names.includes(currentName);
+      const isTop = top > 0 && names.length === top;
+
+      const cardEl = document.createElement('div');
+      cardEl.className = 'day-card' + (picked ? ' picked' : '') + (isTop ? ' top' : '');
+      cardEl.innerHTML =
+        (isTop ? '<div class="star-badge">ยอดนิยม</div>' : '') +
+        '<div class="day-name">' + THAI_DAY[d.getDay()] + '</div>' +
+        '<div class="day-num">' + d.getDate() + '</div>' +
+        '<div class="day-month">' + THAI_MONTH[d.getMonth()] + '</div>' +
+        '<div class="day-count">' + names.length + ' คนว่าง</div>';
+      cardEl.addEventListener('click', () => toggleDate(key));
+      grid.appendChild(cardEl);
+    });
+
+    row.appendChild(grid);
+    container.appendChild(row);
+  });
+
+  renderSummary(weeks);
+}
+
+function renderSummary(weeks){
+  const card = document.getElementById('summaryCard');
+  const all = weeks.flat().map(d => ({ d, key: dateKey(d), names: countFor(dateKey(d)) }))
+    .filter(x => x.names.length > 0)
+    .sort((a,b) => b.names.length - a.names.length || a.d - b.d);
+
+  if(all.length === 0){
+    card.innerHTML = '<div class="empty">ยังไม่มีใครเลือกวันเลย</div>';
+    return;
+  }
+
+  card.innerHTML = '';
+  all.slice(0, 8).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'summary-item';
+    row.innerHTML =
+      '<div>' +
+        '<div class="summary-date">' + THAI_DAY_FULL[item.d.getDay()] + ' ' + item.d.getDate() + ' ' + THAI_MONTH[item.d.getMonth()] + '</div>' +
+        '<div class="summary-names">' + item.names.join(', ') + '</div>' +
+      '</div>' +
+      '<div class="summary-count">' + item.names.length + '</div>';
+    card.appendChild(row);
+  });
+}
+
+document.getElementById('nameInput').addEventListener('input', (e) => {
+  currentName = e.target.value.trim();
+  const hint = document.getElementById('nameHint');
+  hint.classList.remove('warn');
+  hint.textContent = currentName ? 'แตะวันที่คุณว่างด้านล่างได้เลย' : 'ใส่ชื่อก่อน แล้วค่อยแตะวันที่ว่างด้านล่างได้เลย';
+  render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', resetMine);
+
+(async function init(){
+  await loadData();
+  render();
+  setInterval(async () => {
+    await loadData();
+    render();
+  }, 8000);
+})();
+</script>
+</body>
+</html>
