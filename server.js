@@ -57,22 +57,14 @@ async function readStore() {
   if (!USE_REMOTE) {
     raw = readLocal();
   } else {
-    try {
-      const res = await fetch(REMOTE_URL + '/latest', {
-        headers: { 'X-Master-Key': BIN_KEY }
-      });
-      if (!res.ok) throw new Error('jsonbin read failed: ' + res.status);
-      const json = await res.json();
-      raw = json.record || {};
-    } catch (e) {
-      console.error('Remote read failed, falling back to local:', e.message);
-      raw = readLocal();
-    }
+    const res = await fetch(REMOTE_URL + '/latest', {
+      headers: { 'X-Master-Key': BIN_KEY }
+    });
+    if (!res.ok) throw new Error('jsonbin read failed: ' + res.status);
+    const json = await res.json();
+    raw = json.record || {};
   }
-  const { store, migrated } = migrateIfNeeded(raw);
-  if (migrated) {
-    await writeStore(store);
-  }
+  const { store } = migrateIfNeeded(raw);
   return store;
 }
 
@@ -81,26 +73,26 @@ async function writeStore(store) {
     writeLocal(store);
     return;
   }
-  try {
-    const res = await fetch(REMOTE_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': BIN_KEY
-      },
-      body: JSON.stringify(store)
-    });
-    if (!res.ok) throw new Error('jsonbin write failed: ' + res.status);
-  } catch (e) {
-    console.error('Remote write failed, saving locally instead:', e.message);
-    writeLocal(store);
-  }
+  const res = await fetch(REMOTE_URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': BIN_KEY
+    },
+    body: JSON.stringify(store)
+  });
+  if (!res.ok) throw new Error('jsonbin write failed: ' + res.status);
 }
 
 app.get('/api/responses', async (req, res) => {
   const topic = (req.query.topic || LEGACY_TOPIC).toString();
-  const store = await readStore();
-  res.json(store.topics[topic] || {});
+  try {
+    const store = await readStore();
+    res.json(store.topics[topic] || {});
+  } catch (e) {
+    console.error('Read failed:', e.message);
+    res.status(503).json({ error: 'โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง' });
+  }
 });
 
 app.post('/api/responses', async (req, res) => {
@@ -112,14 +104,25 @@ app.post('/api/responses', async (req, res) => {
   if (!Array.isArray(dates)) {
     return res.status(400).json({ error: 'dates ต้องเป็น array' });
   }
-  const store = await readStore();
+  let store;
+  try {
+    store = await readStore();
+  } catch (e) {
+    console.error('Read before write failed:', e.message);
+    return res.status(503).json({ error: 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง' });
+  }
   if (!store.topics[topicKey]) store.topics[topicKey] = {};
   if (dates.length === 0) {
     delete store.topics[topicKey][name.trim()];
   } else {
     store.topics[topicKey][name.trim()] = dates;
   }
-  await writeStore(store);
+  try {
+    await writeStore(store);
+  } catch (e) {
+    console.error('Write failed:', e.message);
+    return res.status(503).json({ error: 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง' });
+  }
   res.json({ ok: true, data: store.topics[topicKey] });
 });
 
