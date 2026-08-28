@@ -3,11 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ไปเดินภูสอยดาวกัน · By Bookky</title>
+<title>หาวันว่างที่ตรงกัน · By Bookky</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    /* Night-out theme (default — "หาวันว่างที่ตรงกัน") */
+    --bg: #17121f;
+    --panel: #241c33;
+    --panel-2: #2f2542;
+    --line: #40325a;
+    --line-soft: #362a4d;
+    --text: #f4eefc;
+    --text-dim: #b7a8cf;
+    --text-faint: #8779a0;
+    --pine: #d6409f;
+    --pine-dark: #a8236f;
+    --moss: #22d3ee;
+    --moss-light: #201a35;
+    --amber: #f2b705;
+    --amber-light: #362a1c;
+    --amber-dark: #f6cb3e;
+    --danger: #ef4477;
+    --hero-top: #241c40;
+  }
+  .theme-forest{
+    /* Phu Soi Dao theme */
     --bg: #f5f3e8;
     --panel: #ffffff;
     --panel-2: #eef2e2;
@@ -24,6 +45,7 @@
     --amber-light: #f6e6c8;
     --amber-dark: #6b4713;
     --danger: #b6503f;
+    --hero-top: #e9edd9;
   }
   *{ box-sizing: border-box; }
   body{
@@ -32,13 +54,14 @@
     color: var(--text);
     font-family: 'IBM Plex Sans Thai', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background .2s ease, color .2s ease;
   }
   .wrap{ max-width: 720px; margin: 0 auto; padding: 0 0 48px; }
   .hero{
     position: relative;
     overflow: hidden;
     padding: 40px 24px 28px;
-    background: linear-gradient(180deg,#e9edd9 0%, var(--bg) 82%);
+    background: linear-gradient(180deg, var(--hero-top) 0%, var(--bg) 82%);
     border-bottom: 1px solid var(--line);
   }
   .hero svg{ position:absolute; left:0; right:0; bottom:0; width:100%; height:auto; }
@@ -56,7 +79,7 @@
   .tab-bar{ display:flex; gap:8px; margin-top:18px; position:relative; z-index:2; }
   .tab-btn{
     font-family: inherit; font-size:13.5px; font-weight:500; padding:9px 16px;
-    border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.55);
+    border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2);
     color: var(--text-dim); cursor:pointer;
   }
   .tab-btn.active{ background: var(--pine); border-color: var(--pine); color:#fff; }
@@ -95,17 +118,17 @@
   .day-card.picked{ border-color: var(--pine); background: var(--pine); }
   .day-card.top{ border-color: var(--amber); }
   .day-name{ font-size:12px; color: var(--text-dim); font-weight:600; margin-bottom:4px; }
-  .day-card.picked .day-name{ color: #d7e6d4; }
+  .day-card.picked .day-name{ color: rgba(255,255,255,0.82); }
   .day-num{ font-family:'Kanit', sans-serif; font-size:24px; font-weight:600; line-height:1.1; }
   .day-card.picked .day-num{ color: #ffffff; }
   .day-month{ font-size:11.5px; color: var(--text-faint); margin-top:2px; }
-  .day-card.picked .day-month{ color: #b9d0b6; }
+  .day-card.picked .day-month{ color: rgba(255,255,255,0.65); }
   .day-count{
     margin-top:8px; display:inline-flex; align-items:center; gap:4px;
     font-size:12px; font-weight:600; color: var(--text-dim);
     background: var(--moss-light); border-radius:20px; padding:3px 9px;
   }
-  .day-card.picked .day-count{ background: rgba(255,255,255,0.18); color:#eef6ec; }
+  .day-card.picked .day-count{ background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.92); }
   .star-badge{
     position:absolute; top:-8px; right:-6px; background: var(--amber); color: var(--amber-dark);
     font-size:10px; font-weight:700; padding:3px 7px; border-radius:20px;
@@ -182,15 +205,11 @@
 <div class="wrap">
 
   <div class="hero">
-    <svg viewBox="0 0 720 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="0,150 0,100 60,58 110,92 170,48 230,96 290,66 350,102 410,52 470,96 530,62 590,102 650,72 720,98 720,150" fill="#c9d6b5" opacity="0.85"/>
-      <polygon points="0,150 0,125 80,88 150,118 220,80 300,122 380,88 460,126 540,92 620,120 700,88 720,100 720,150" fill="#9fb583" opacity="0.9"/>
-      <polygon points="0,150 0,140 90,118 160,138 230,112 310,140 390,116 470,140 550,116 630,138 700,116 720,124 720,150" fill="#4d6b3e"/>
-    </svg>
+    <div id="heroArt"></div>
     <div class="hero-content">
-      <p class="eyebrow">นัดหมายทริป · By Bookky</p>
-      <h1 id="pageTitle">ไปเดินภูสอยดาวกัน</h1>
-      <p class="sub" id="pageSub">เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด</p>
+      <p class="eyebrow" id="pageEyebrow">นัดหมายกลุ่ม · By Bookky</p>
+      <h1 id="pageTitle">หาวันว่างที่ตรงกัน</h1>
+      <p class="sub" id="pageSub">เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าคืนไหนนัดเพื่อนออกไปเที่ยวกันได้พร้อมหน้า</p>
       <div class="tab-bar" id="tabBar"></div>
     </div>
   </div>
@@ -235,18 +254,52 @@ const THAI_MONTH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.'
 
 const TOPICS = [
   {
+    key: 'friends-holidays',
+    tabLabel: 'หาวันว่างที่ตรงกัน',
+    title: 'หาวันว่างที่ตรงกัน',
+    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าคืนไหนนัดเพื่อนออกไปเที่ยวกันได้พร้อมหน้า',
+    eyebrow: 'นัดหมายกลุ่ม · By Bookky',
+    theme: 'night'
+  },
+  {
     key: 'phu-sao-dao',
     tabLabel: 'ภูสอยดาว',
     title: 'ไปเดินภูสอยดาวกัน',
-    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด'
-  },
-  {
-    key: 'friends-holidays',
-    tabLabel: 'วันหยุดของเพื่อนๆ',
-    title: 'วันหยุดของเพื่อนๆ',
-    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่างงานทั่วไป ใช้ดูวันว่างร่วมกันแบบไม่ผูกกับทริปไหนโดยเฉพาะ'
+    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด',
+    eyebrow: 'นัดหมายทริป · By Bookky',
+    theme: 'forest'
   }
 ];
+
+const HERO_ART = {
+  night: '<svg viewBox="0 0 720 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<circle cx="600" cy="34" r="16" fill="#f6cb3e" opacity="0.9"/>' +
+    '<circle cx="592" cy="29" r="14" fill="#241c40"/>' +
+    '<circle cx="90" cy="24" r="1.4" fill="#f4eefc" opacity="0.8"/>' +
+    '<circle cx="150" cy="40" r="1" fill="#f4eefc" opacity="0.5"/>' +
+    '<circle cx="220" cy="18" r="1.3" fill="#f4eefc" opacity="0.7"/>' +
+    '<circle cx="320" cy="30" r="1" fill="#f4eefc" opacity="0.5"/>' +
+    '<circle cx="420" cy="16" r="1.4" fill="#f4eefc" opacity="0.8"/>' +
+    '<circle cx="500" cy="36" r="1" fill="#f4eefc" opacity="0.5"/>' +
+    '<polygon points="0,150 0,80 20,80 20,60 40,60 40,90 60,90 60,50 85,50 85,100 110,100 110,70 130,70 130,110 155,110 155,65 180,65 180,95 205,95 205,55 230,55 230,105 255,105 255,75 280,75 280,150" fill="#241c33" opacity="0.9"/>' +
+    '<rect x="26" y="66" width="6" height="6" fill="#f2b705" opacity="0.85"/>' +
+    '<rect x="50" y="60" width="5" height="5" fill="#f2b705" opacity="0.7"/>' +
+    '<rect x="92" y="60" width="5" height="5" fill="#22d3ee" opacity="0.8"/>' +
+    '<rect x="161" y="76" width="5" height="5" fill="#f2b705" opacity="0.8"/>' +
+    '<rect x="211" y="66" width="5" height="5" fill="#22d3ee" opacity="0.7"/>' +
+    '<polygon points="260,150 260,110 285,110 285,85 310,85 310,120 335,120 335,95 360,95 360,130 385,130 385,75 410,75 410,140 435,140 435,100 460,100 460,150" fill="#2f2542"/>' +
+    '<rect x="291" y="95" width="6" height="6" fill="#d6409f" opacity="0.85"/>' +
+    '<rect x="341" y="105" width="5" height="5" fill="#f2b705" opacity="0.8"/>' +
+    '<rect x="391" y="85" width="5" height="5" fill="#22d3ee" opacity="0.7"/>' +
+    '<polygon points="450,150 450,120 470,120 470,95 495,95 495,130 520,130 520,105 545,105 545,140 570,140 570,90 595,90 595,150" fill="#241c33" opacity="0.9"/>' +
+    '<polygon points="580,150 580,110 605,110 605,80 630,80 630,120 655,120 655,90 680,90 680,135 705,135 705,100 720,100 720,150" fill="#2f2542"/>' +
+    '</svg>',
+  forest: '<svg viewBox="0 0 720 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<polygon points="0,150 0,100 60,58 110,92 170,48 230,96 290,66 350,102 410,52 470,96 530,62 590,102 650,72 720,98 720,150" fill="#c9d6b5" opacity="0.85"/>' +
+    '<polygon points="0,150 0,125 80,88 150,118 220,80 300,122 380,88 460,126 540,92 620,120 700,88 720,100 720,150" fill="#9fb583" opacity="0.9"/>' +
+    '<polygon points="0,150 0,140 90,118 160,138 230,112 310,140 390,116 470,140 550,116 630,138 700,116 720,124 720,150" fill="#4d6b3e"/>' +
+    '</svg>'
+};
 
 let currentTopic = TOPICS[0].key;
 let responses = {};
@@ -269,12 +322,20 @@ function renderTabs(){
   });
 }
 
-async function switchTopic(topicKey){
-  if(topicKey === currentTopic) return;
-  currentTopic = topicKey;
+function applyTopicChrome(){
   const cfg = getTopicConfig();
   document.getElementById('pageTitle').textContent = cfg.title;
   document.getElementById('pageSub').textContent = cfg.sub;
+  document.getElementById('pageEyebrow').textContent = cfg.eyebrow;
+  document.getElementById('heroArt').innerHTML = HERO_ART[cfg.theme] || '';
+  document.body.classList.toggle('theme-forest', cfg.theme === 'forest');
+  document.title = cfg.title + ' · By Bookky';
+}
+
+async function switchTopic(topicKey){
+  if(topicKey === currentTopic) return;
+  currentTopic = topicKey;
+  applyTopicChrome();
   renderTabs();
   summaryExpanded = false;
   await loadData();
@@ -286,24 +347,25 @@ function dateKey(d){
 }
 
 function buildDateList(){
-  const days = [];
   const today = new Date();
   today.setHours(0,0,0,0);
   const cursor = new Date(today);
   const yearEnd = new Date(today.getFullYear(), 11, 31);
+  const groups = {};
+  const order = [];
   while(cursor <= yearEnd){
-    cursor.setDate(cursor.getDate() + 1);
-    if(cursor > yearEnd) break;
     const dow = cursor.getDay();
     if(dow === 5 || dow === 6 || dow === 0){
-      days.push(new Date(cursor));
+      const friday = new Date(cursor);
+      if(dow === 6) friday.setDate(friday.getDate() - 1);
+      if(dow === 0) friday.setDate(friday.getDate() - 2);
+      const key = dateKey(friday);
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(new Date(cursor));
     }
+    cursor.setDate(cursor.getDate() + 1);
   }
-  const weeks = [];
-  for(let i = 0; i < days.length; i += 3){
-    weeks.push(days.slice(i, i+3));
-  }
-  return weeks;
+  return order.map(k => groups[k]);
 }
 
 function countFor(key){
@@ -536,6 +598,7 @@ document.getElementById('manageToggle').addEventListener('click', () => {
 });
 
 (async function init(){
+  applyTopicChrome();
   renderTabs();
   await loadData();
   render();
