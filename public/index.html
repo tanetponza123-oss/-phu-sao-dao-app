@@ -53,6 +53,14 @@
   }
   .sub{ font-size: 15px; color: var(--text-dim); max-width: 480px; line-height:1.6; margin:0; }
 
+  .tab-bar{ display:flex; gap:8px; margin-top:18px; position:relative; z-index:2; }
+  .tab-btn{
+    font-family: inherit; font-size:13.5px; font-weight:500; padding:9px 16px;
+    border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.55);
+    color: var(--text-dim); cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--pine); border-color: var(--pine); color:#fff; }
+
   .section{ padding: 28px 24px 0; }
   .card{
     background: var(--panel); border:1px solid var(--line); border-radius:14px;
@@ -181,8 +189,9 @@
     </svg>
     <div class="hero-content">
       <p class="eyebrow">นัดหมายทริป · By Bookky</p>
-      <h1>ไปเดินภูสอยดาวกัน</h1>
-      <p class="sub">เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด</p>
+      <h1 id="pageTitle">ไปเดินภูสอยดาวกัน</h1>
+      <p class="sub" id="pageSub">เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด</p>
+      <div class="tab-bar" id="tabBar"></div>
     </div>
   </div>
 
@@ -224,8 +233,53 @@ const THAI_DAY = { 5: 'ศ', 6: 'ส', 0: 'อา' };
 const THAI_DAY_FULL = { 5: 'ศุกร์', 6: 'เสาร์', 0: 'อาทิตย์' };
 const THAI_MONTH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
+const TOPICS = [
+  {
+    key: 'phu-sao-dao',
+    tabLabel: 'ภูสอยดาว',
+    title: 'ไปเดินภูสอยดาวกัน',
+    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่าง แล้วมาดูกันว่าสัปดาห์ไหนเพื่อนว่างพร้อมกันเยอะที่สุด'
+  },
+  {
+    key: 'friends-holidays',
+    tabLabel: 'วันหยุดของเพื่อนๆ',
+    title: 'วันหยุดของเพื่อนๆ',
+    sub: 'เลือกวัน ศุกร์ / เสาร์ / อาทิตย์ ที่คุณว่างงานทั่วไป ใช้ดูวันว่างร่วมกันแบบไม่ผูกกับทริปไหนโดยเฉพาะ'
+  }
+];
+
+let currentTopic = TOPICS[0].key;
 let responses = {};
 let currentName = '';
+let summaryExpanded = false;
+
+function getTopicConfig(){
+  return TOPICS.find(t => t.key === currentTopic) || TOPICS[0];
+}
+
+function renderTabs(){
+  const bar = document.getElementById('tabBar');
+  bar.innerHTML = '';
+  TOPICS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (t.key === currentTopic ? ' active' : '');
+    btn.textContent = t.tabLabel;
+    btn.addEventListener('click', () => switchTopic(t.key));
+    bar.appendChild(btn);
+  });
+}
+
+async function switchTopic(topicKey){
+  if(topicKey === currentTopic) return;
+  currentTopic = topicKey;
+  const cfg = getTopicConfig();
+  document.getElementById('pageTitle').textContent = cfg.title;
+  document.getElementById('pageSub').textContent = cfg.sub;
+  renderTabs();
+  summaryExpanded = false;
+  await loadData();
+  render();
+}
 
 function dateKey(d){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -276,7 +330,7 @@ function setStatus(text){
 
 async function loadData(){
   try{
-    const res = await fetch('/api/responses');
+    const res = await fetch('/api/responses?topic=' + encodeURIComponent(currentTopic));
     if(!res.ok) throw new Error('bad response');
     responses = await res.json();
   }catch(e){
@@ -290,7 +344,7 @@ async function saveName(name){
     const res = await fetch('/api/responses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, dates: responses[name] || [] })
+      body: JSON.stringify({ topic: currentTopic, name: name, dates: responses[name] || [] })
     });
     if(!res.ok) throw new Error('bad response');
     setStatus('บันทึกแล้ว');
@@ -374,8 +428,6 @@ function render(){
   renderSummary(weeks);
   renderManageList();
 }
-
-let summaryExpanded = false;
 
 function renderSummary(weeks){
   const card = document.getElementById('summaryCard');
@@ -484,6 +536,7 @@ document.getElementById('manageToggle').addEventListener('click', () => {
 });
 
 (async function init(){
+  renderTabs();
   await loadData();
   render();
   setInterval(async () => {
